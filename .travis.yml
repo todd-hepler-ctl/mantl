@@ -42,3 +42,11 @@ script:
 
 after_script:
   - if [ -n "$DOCKER_SECRETS" ]; then docker run $DOCKER_ARGS -v $(pwd)/testing:/local -v $(pwd):/mantl $DOCKER_SECRETS $DOCKER_IMAGE "python docker.py ci-destroy"; fi
+
+before_cache:
+  - mkdir travis-mantl-cache
+  - cp terraform.tfstate travis-mantl-cache/
+
+cache:
+  directories:
+    - travis-mantl-cache
