@@ -17,11 +17,12 @@ docker_lvm_backed: "{% if provider in ['gce', 'openstack', 'aws'] %}True{% else 
 docker_log_driver: journald
 
 # Docker options
+docker_selinux_enabled: false
 docker_options:
   - "--dns {{ private_ipv4 }}"
   - "--log-driver={{ docker_log_driver }}"
   - "--disable-legacy-registry"
-  - "--selinux-enabled"
+  - "{% if docker_selinux_enabled %}--selinux-enabled{% endif %}"
   - "{% if kube_build is defined %}--dns-search {{ cluster_name }}{% endif %}"
 
 docker_tcp: false
