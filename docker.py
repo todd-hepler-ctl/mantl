@@ -174,7 +174,7 @@ cd ./mantl/{commit};
 def ci_destroy():
     """Cleanup after ci_build"""
 
-    destroy_cmd = "terraform destroy -force"
+    destroy_cmd = "terraform destroy -force -state=/mantl/travis-mantl-cache/terraform.tfstate"
     if 'OS_IP' in os.environ:
         ssh_cmd = '''
 ssh -i {keypath} -p {ssh_port}

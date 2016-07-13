@@ -40,11 +40,8 @@ script:
   - python2 testing/test-health-checks.py
   - docker run $DOCKER_ARGS -v $(pwd)/testing:/local -v $(pwd):/mantl $DOCKER_SECRETS $DOCKER_IMAGE "python docker.py ci-build"
 
-after_script:
-  - if [ -n "$DOCKER_SECRETS" ]; then docker run $DOCKER_ARGS -v $(pwd)/testing:/local -v $(pwd):/mantl $DOCKER_SECRETS $DOCKER_IMAGE "python docker.py ci-destroy"; fi
-
 before_cache:
-  - docker run $DOCKER_ARGS -v $(pwd):/mantl $DOCKER_SECRETS $DOCKER_IMAGE "terraform destroy -force -state=/mantl/travis-mantl-cache/terraform.tfstate"
+  - if [ -n "$DOCKER_SECRETS" ]; then docker run $DOCKER_ARGS -v $(pwd)/testing:/local -v $(pwd):/mantl $DOCKER_SECRETS $DOCKER_IMAGE "python docker.py ci-destroy"; fi
   - mkdir travis-mantl-cache
   - cp terraform.tfstate travis-mantl-cache/
 
