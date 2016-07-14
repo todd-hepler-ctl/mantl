@@ -55,7 +55,7 @@ if __name__ == "__main__":
     # TODO: replace this with either click or pypsi
     if len(argv) < 2 or argv[1] != "plan-only":
         setup.extend([
-            (["terraform", "apply"], 1),
+            (["terraform", "apply", "-state=testing/cache/terraform.tfstate"], 1),
             (ap + ["playbooks/wait-for-hosts.yml"], 3),
             (ap + ["-e", "serial=0", "playbooks/upgrade-packages.yml"], 1),
             (ap + ["sample.yml"], 1),
