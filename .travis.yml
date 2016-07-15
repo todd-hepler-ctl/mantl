@@ -29,13 +29,14 @@ env:
   - PROVIDER=softlayer
   - PROVIDER=triton
 
-install: if [ -n "$DOCKER_SECRETS" ]; then docker run $DOCKER_ARGS -v $(pwd)/testing:/local -v $(pwd):/mantl $DOCKER_SECRETS $DOCKER_IMAGE "python docker.py ci-destroy"; fi
-
-before_script:
+install:
   - export TERRAFORM_FILE=testing/terraform/${PROVIDER}.tf
   - export CI_HEAD_COMMIT=$(git rev-list -n 1 --no-merges --branches="$(git rev-parse --abbrev-ref HEAD)" master...HEAD)
   - echo $CI_HEAD_COMMIT
   - docker pull $DOCKER_IMAGE
+
+before_script:
+  - if [ -n "$DOCKER_SECRETS" ]; then docker run $DOCKER_ARGS -v $(pwd)/testing:/local -v $(pwd):/mantl $DOCKER_SECRETS $DOCKER_IMAGE "python docker.py ci-destroy"; fi
   - docker run $DOCKER_ARGS -v $(pwd)/testing:/local -v $(pwd):/mantl $DOCKER_SECRETS $DOCKER_IMAGE "python2 docker.py ci-setup"
 
 script:
