@@ -13,12 +13,13 @@ import sys
 import urllib2
 
 ## TRAVIS STEPS
-# generate keys with run_cmd
+
 def install():
     cmds = [
         (["pip", "install", "-r", "requirements.txt"], 1),
         (["curl"], 1),
         (["unzip"], 1),
+        (["ssh-keygen"], 1),
             ]
 
     run_cmds(cmds)
@@ -27,19 +28,27 @@ def install():
 def script():
 
     # Filter out commits that are documentation changes.
-    get_commit_range()
+    commit_range = os.environ.get("TRAVIS_COMMIT_RANGE", "master..HEAD")
+    diff_names = str(subprocess.check_output(["git",  "diff",  "--name-only", commit_range]))
+
+    not_docfiles = filter_not_docfiles(diff_names)
+    if len(not_docfiles) < 1:
+        logging.info("All of the changes were in documentation. Skipping build.")
+        sys.exit(0)
 
     linting_providers = ["clc", "softlayer", "triton"]
     deploy_providers = ["gce", "aws", "do"]
 
-    cmds = linter()
+    cmds = linter_cmds()
 
     if os.environ.get("PROVIDER", None) in deploy_providers:
         cmds.extend(deploy_to_cloud())
-        cmds.extend(health_checks())
 
     if not run_cmds(cmds, fail_sequential=True):
         sys.exit(1)
+
+    health_checks()
+
     sys.exit(0)
 
 
@@ -53,7 +62,7 @@ def after_script():
     # send slack notification
 
 
-## UTILITY FUNCS
+## PURE-ISH FUNCTIONS
 
 def run_cmd(cmd, attempts=1):
     """ Runs a command attempts times, logging its output. Returns True if it
@@ -93,24 +102,20 @@ def run_cmds(cmds, fail_sequential=False):
     return to_return
 
 
-def get_commit_range():
-    commit_range_cmd = 'git diff --name-only {}'.format(os.environ['TRAVIS_COMMIT_RANGE'])
-    commit_range_str = str(subprocess.check_output(split(commit_range_cmd)))
+def filter_not_docfiles(diff_names):
 
-    commit_range = []
-    for commit in commit_range_str.split():
-        if commit.startswith('docs'):
-            logging.info("Modified file in docs directory: %s", commit)
-        elif commit.endswith('md'):
-            logging.info("Modified file has markdown extension: %s", commit)
-        elif commit.endswith('rst'):
-            logging.info("Modified file has reST extension: %s", commit)
+    not_docfiles = []
+    for diff_name in diff_names.split():
+        if diff_name.startswith('docs'):
+            continue
+        elif diff_name.endswith('md'):
+            continue
+        elif diff_name.endswith('rst'):
+            continue
         else:
-            logging.info("Modified file not marked as docfile: %s", commit)
-            commit_range.append(commit)
-    if len(commit_range) < 1:
-        logging.info("All of the changes were in documentation. Skipping build.")
-        sys.exit(0)
+            not_docfiles.append(diff_name)
+
+    return not_docfiles
 
 
 def linter_cmds():
@@ -127,13 +132,13 @@ def deploy_to_cloud_cmds():
         "~/.ssh/id_rsa"
     ]
 
-    return_value = [
+    cmds = [
             (["terraform", "apply"], 1),
             (ap + ["playbooks/wait-for-hosts.yml"], 3),
             (ap + ["-e", "serial=0", "playbooks/upgrade-packages.yml"], 1),
             (ap + ["sample.yml"], 1),
         ]
-    return return_value
+    return cmds
 
 
 
