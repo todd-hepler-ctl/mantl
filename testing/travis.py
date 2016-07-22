@@ -12,14 +12,18 @@ import subprocess
 import sys
 import urllib2
 
+# FROM plugins/inventory/terraform.py
+# PYTHON_PATH is added to in .travis.yml
+import terraform as tf
+
 ## TRAVIS STEPS
 
 def install():
     cmds = [
         (["pip", "install", "-r", "requirements.txt"], 1),
-        (["curl"], 1),
-        (["unzip"], 1),
-        (["ssh-keygen"], 1),
+        (["curl", "-SL0", "terraform.zip",  "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip"], 1),
+        (["unzip", "-d", "testing/cache/", "terraform.zip"], 1),
+        (["ssh-keygen", "-N", '""', "-f", "~/.ssh/id_rsa"], 1),
             ]
 
     run_cmds(cmds)
@@ -141,7 +145,6 @@ def deploy_to_cloud_cmds():
     return cmds
 
 
-
 def get_credentials():
     """ Get consul api password from security.yml """
     # TODO: Should we just add pyyaml as a dependency?
@@ -158,28 +161,6 @@ def get_credentials():
         # Returning "" ensures that unit tests will run network code, rather
         # than just failing because security.yml isn't present.
         return ""
-
-
-def get_hosts_from_json(json_str, role="control"):
-    """ Get a list of (hostname, ip) pairs with a certain role from a JSON
-    string """
-    ips = []
-    host_data = json.loads(json_str)["_meta"]["hostvars"]
-    for key, dic in host_data.iteritems():
-        if dic.get("role", "").lower() == role:
-            ips.append((key, dic["public_ipv4"]))
-    return ips
-
-
-def get_hosts_from_dynamic_inventory(cmd, role="control"):
-    """ Get a list of IP addresses of control hosts from terraform.py """
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-    rc = proc.wait()
-    if rc != 0:
-        logging.error("terraform.py exited with ", rc)
-        return []
-    else:
-        return get_hosts_from_json(proc.stdout.read())
 
 
 def failing_checks(node_address, timeout=30):
@@ -205,8 +186,8 @@ def failing_checks(node_address, timeout=30):
 def health_checks():
     logging.info("Getting hosts")
     # Get IP addresses of hosts from a dynamic inventory script
-    cmd = ["python2", "plugins/inventory/terraform.py", "--list"]
-    hosts = get_hosts_from_dynamic_inventory(cmd)
+    hosts = tf.query_list(tf.iterhosts(tf.iterresources(tf.tfstates())))
+
 
     if len(hosts) == 0:
         logging.error("terraform.py reported no control hosts.")
@@ -251,7 +232,6 @@ if __name__ == "__main__":
     logfmt = "%(asctime)s  %(levelname)s  %(message)s"
     logging.basicConfig(format=logfmt, level=logging.INFO)
 
-    # TODO: replace this with either click or pypsi
     if len(sys.argv) > 1:
         if sys.argv[1] == 'install':
             install()
