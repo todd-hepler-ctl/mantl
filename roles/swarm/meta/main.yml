@@ -1,11 +1,9 @@
 ---
 dependencies:
   - role: handlers
-
   - role: certificates
-    when: swarm_tcp_tls or do_consul_ssl
 
   # Open the Docker socket to the network
   - role: docker
     docker_tcp: true
-    docker_tcp_tls: swarm_tcp_tls
+    docker_tcp_tls: "{{ swarm_tcp_tls }}"
