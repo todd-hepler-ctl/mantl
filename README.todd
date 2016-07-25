@@ -1,0 +1,18 @@
+
+things I used to build this:
+
+https://github.com/CiscoCloud/mantl/blob/master/docs/getting_started/clc.rst
+
+copied ./clc.rst from there
+filled in provider "clc" section in clc.rst
+changed ssh_pass
+wrote setenv.sh
+. ./setenv.sh
+git tag # to see versions
+git co 1.1.0 # looked reasonable
+terraform plan; terraform apply 2>&1 | tee tf-apply.log
+
+
+https://github.com/CiscoCloud/mantl/blob/master/docs/getting_started/index.rst
+
+ran security-setup -- input same password as in clc.tf

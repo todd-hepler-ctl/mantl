@@ -1,7 +1,6 @@
 docs/_build
 *.pyc
 .vagrant
-security.yml
 
 # TLS certificates
 ssl/**/*.pem
@@ -12,9 +11,6 @@ ssl/kubernetes
 *.retry
 
 # terraform
-/*.tf
-**/*.tfstate*
-**/.terraform
 
 # downloaded by playbook
 addons/library/

@@ -1,0 +1,52 @@
+---
+chronos_http_credentials: admin:SeeEllSeeMant!
+chronos_principal: chronos
+chronos_secret: OlE9ZoZdGNwZU+8Lp6hIdFRjogvHJpfq5/+QsB5WCqyM
+consul_acl_agent_token: 2ae1ee6d-4e86-4b9c-a5cd-524175cc2f54
+consul_acl_marathon_token: f172a6f1-30db-44a6-89e2-28f64596322e
+consul_acl_master_token: 87efbe64-8831-4e28-b4c5-efe54cc1ab6d
+consul_acl_secure_token: a4710855-2c6a-4285-aa39-c5ed56404a8e
+consul_acl_vault_token: b0b4da8b-5551-4944-aa6b-ce4c08c622b9
+consul_dns_domain: consul
+consul_gossip_key: 5dWflbWTv4lwD6zOndHPdQ==
+do_chronos_auth: true
+do_chronos_iptables: true
+do_chronos_ssl: true
+do_consul_auth: true
+do_consul_ssl: true
+do_mantl_api_auth: true
+do_mantlui_auth: true
+do_mantlui_ssl: true
+do_marathon_auth: true
+do_marathon_iptables: true
+do_marathon_ssl: true
+do_mesos_auth: true
+do_mesos_follower_auth: true
+do_mesos_framework_auth: true
+do_mesos_iptables: true
+do_mesos_ssl: true
+do_private_docker_registry: false
+mantl_api_principal: mantl-api
+mantl_api_secret: 3oHvSc2DwPUNh4EY/6aKzTVmlykRif0ACOEl0h7UafJg
+marathon_http_credentials: admin:SeeEllSeeMant!
+marathon_principal: marathon
+marathon_secret: 6UY3JkcLDxbL2jsj7YvAowG6tVJmlrkYWTwhX+EJt/Mr
+mesos_credentials:
+- {principal: marathon, secret: 6UY3JkcLDxbL2jsj7YvAowG6tVJmlrkYWTwhX+EJt/Mr}
+- {principal: chronos, secret: OlE9ZoZdGNwZU+8Lp6hIdFRjogvHJpfq5/+QsB5WCqyM}
+- {principal: mantl-api, secret: 3oHvSc2DwPUNh4EY/6aKzTVmlykRif0ACOEl0h7UafJg}
+mesos_follower_principal: follower
+mesos_follower_secret: wvotNZJ1NIo08e12uvojfhnVZ/EI5CEviMvniVQJnq6A
+nginx_admin_password: SeeEllSeeMant!
+security_enabled: true
+zk_chronos_user: chronos
+zk_chronos_user_secret: IPvQroBNbRGGMKc0
+zk_chronos_user_secret_digest: IGbtpSj4mGWB1I/f3i+w0PO230Q=
+zk_marathon_user: marathon
+zk_marathon_user_secret: sV78lRZwjAoQ351C
+zk_marathon_user_secret_digest: XZ7hRPlekXMxGEPRfAYSe8/aX6g=
+zk_mesos_user: mesos
+zk_mesos_user_secret: qxteXkYs7kioLks7
+zk_mesos_user_secret_digest: ORtVCBIaIgvLwxpAKqXZE2dWLFs=
+zk_super_user: super
+zk_super_user_secret: w3e4Gr3kjxdTKW2m5X8JC3Au/ETUcIFyQSHTTdBKb544
