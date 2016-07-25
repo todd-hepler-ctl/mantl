@@ -19,14 +19,12 @@ import terraform as tf
 ## TRAVIS STEPS
 
 def install():
-    cmds = [
+    run_cmds([
         (["pip", "install", "-r", "requirements.txt"], 1),
         (["curl", "-SL0", "terraform.zip",  "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip"], 1),
         (["unzip", "-d", "testing/cache/", "terraform.zip"], 1),
         (["ssh-keygen", "-N", '""', "-f", "~/.ssh/id_rsa"], 1),
-            ]
-
-    run_cmds(cmds)
+            ])
 
 
 def script():
@@ -43,15 +41,28 @@ def script():
     linting_providers = ["clc", "softlayer", "triton"]
     deploy_providers = ["gce", "aws", "do"]
 
-    cmds = linter_cmds()
+    # linter commands
+    cmds = [
+        (["terraform", "get"], 1),
+        (["terraform", "plan", "--input=false", "--refresh=false"], 1),
+    ]
 
     if os.environ.get("PROVIDER", None) in deploy_providers:
-        cmds.extend(deploy_to_cloud())
+        ansible_prefix = [
+            "ansible-playbook", "-e", "@security.yml", "--private-key",
+            "~/.ssh/id_rsa"
+        ]
+
+        cmds.extend([
+                (["ssh-add"], 1),
+                (["terraform", "apply"], 1),
+                (ansible_prefix + ["playbooks/wait-for-hosts.yml"], 3),
+                (ansible_prefix + ["playbooks/upgrade-packages.yml"], 1),
+                (ansible_prefix + ["sample.yml"], 1),
+            ]
 
     if not run_cmds(cmds, fail_sequential=True):
         sys.exit(1)
-
-    health_checks()
 
     sys.exit(0)
 
@@ -108,40 +119,11 @@ def run_cmds(cmds, fail_sequential=False):
 
 def filter_not_docfiles(diff_names):
 
-    not_docfiles = []
-    for diff_name in diff_names.split():
-        if diff_name.startswith('docs'):
-            continue
-        elif diff_name.endswith('md'):
-            continue
-        elif diff_name.endswith('rst'):
-            continue
-        else:
-            not_docfiles.append(diff_name)
-
-    return not_docfiles
-
-
-def linter_cmds():
-    return [
-        (["ssh-add"], 1),
-        (["terraform", "get"], 1),
-        (["terraform", "plan", "--input=false", "--refresh=false"], 1),
-    ]
+    is_doc = lambda f: f.startswith('docs') or any [f.endswith(ext) for ext in ['md', 'rst']]
+    return [f for f in diff_names.split() if not is_doc(f)]
 
 
 def deploy_to_cloud_cmds():
-    ap = [
-        "ansible-playbook", "-e", "@security.yml", "--private-key",
-        "~/.ssh/id_rsa"
-    ]
-
-    cmds = [
-            (["terraform", "apply"], 1),
-            (ap + ["playbooks/wait-for-hosts.yml"], 3),
-            (ap + ["-e", "serial=0", "playbooks/upgrade-packages.yml"], 1),
-            (ap + ["sample.yml"], 1),
-        ]
     return cmds
 
 
@@ -158,8 +140,7 @@ def get_credentials():
                     # only grab what we need
                     return "admin:"+password
     except IOError:
-        # Returning "" ensures that unit tests will run network code, rather
-        # than just failing because security.yml isn't present.
+        logging.info('security.yml missing, return "" for unit test instead')
         return ""
 
 
@@ -237,6 +218,8 @@ if __name__ == "__main__":
             install()
         elif sys.argv[1] == 'script':
             script()
+        elif sys.argv[1] == 'health_checks':
+           health_checks()
         elif sys.argv[1] == 'after_script':
             after_script()
         else:

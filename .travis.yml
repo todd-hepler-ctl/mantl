@@ -31,6 +31,8 @@ before_script:
   - export CI_HEAD_COMMIT=$(git rev-list -n 1 --no-merges --branches="$(git rev-parse --abbrev-ref HEAD)" master...HEAD)
   - echo $CI_HEAD_COMMIT
 
-script: python testing/travis.py script
+script: 
+  - python testing/travis.py script
+  - python testing/travis.py health_checks
 
 after_script: python testing/travis.py after_script
