@@ -5,8 +5,7 @@ cluster. See the README.md in each folder for a detailed walkthrough of running
 them.
 
 Below, we will explore some information that is useful when executing any of the
-examples, and later, attempt to achieve a conceptual understanding of what is
-going on.
+examples, and later, explore some next steps and more advanced usage.
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-generate-toc again -->
 **Table of Contents**
@@ -40,7 +39,6 @@ going on.
 
 <!-- markdown-toc end -->
 
-
 ## General Information
 
 ### Creating a Mantl Cluster
@@ -58,7 +56,8 @@ for more information on using a cloud provider.
 
 ### IPs and URLs
 
-Marathon runs on port 8080 or at the /marathon endpoint.
+Marathon runs on `https://<your-control-ip>:8080` or
+`https://<your-control-ip>/marathon`.
 
 #### Vagrant
 
@@ -73,7 +72,6 @@ Run
 ./plugins/inventory/terraform.py --hostfile
 ```
 to see the IP addresses of your nodes.
-
 
 ### Usernames and Passwords
 
@@ -120,14 +118,15 @@ curl -X POST \
 It may take a few minutes for Marathon to download the Docker image of your
 application.
 
-See [the README for the examples folder](../README.md), under "Using curl" for
-more details on why we use these options, and "Possible Sticking Points" for
-some things that can go wrong.
+See the "Using curl" section for more details on why we use these options, and
+"Possible Sticking Points" for some things that can go wrong.
 
 #### With Kubernetes
 
-Currently, only the hello-world example can be used with kubernetes. More examples
-are planned.
+Currently, only the hello-world example can be used with kubernetes. More
+examples are planned.
+
+Please ensure your cluster has kubeworker nodes before continuing.
 
 Either configure your local installation of `kubectl` to talk to the kubernetes
 API using [the instructions in the Kubernetes README](https://github.com/CiscoCloud/mantl/tree/master/roles/kubernetes#running-kubectl-remotely),
@@ -167,13 +166,13 @@ navigate to `http://<host>:<port>`.
 
 #### With Marathon + Mesos (Web UI)
 
-Open a browser window to the Marathon UI at `https://<your-control-ip/marathon`.
-To get information about an app click on the row in the UI. You should see a host,
+Open a browser window to the Marathon UI (see the section "IPs and URLs"). To
+get information about an app click on the row in the UI. You should see a host,
 ID, and port. In your browser, navigate to `http://<host>:<port>`.
 
 ![marathonui](./images/marathonui.png)
 
-Click on the row for your application, and you'll see something like
+Click on the row for your application, and you'll see something like this:
 
 ![marathonui at application](./images/marathonapp.png)
 
@@ -189,6 +188,7 @@ it to the IP of your node. Open the browser to `<worker-ip>:9061` and you'll see
 ![hello world application](./images/helloworld.png)
 
 #### With Kubernetes
+
 While logged into the remote host, or using your customized `kubectl` command,
 run
 ```bash
